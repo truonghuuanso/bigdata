@@ -1,0 +1,12 @@
+# Python / Virtual environment
+venv/
+__pycache__/
+*.py[cod]
+
+# Airflow logs
+airflow/logs/
+
+# dbt compiled / target files
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/

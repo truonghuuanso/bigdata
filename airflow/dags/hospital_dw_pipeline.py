@@ -56,11 +56,42 @@ def task_load_layer5():
 
 
 # ----------------------------------------------------------------------
+# Ham dung chung: goi docker exec vao container dbt de chay lenh dbt,
+# giong het lenh ban da go tay tren terminal
+# ----------------------------------------------------------------------
+def run_dbt_command(dbt_subcommand: str):
+    client = docker.from_env()
+    container = client.containers.get("dbt")
+
+    cmd = f"dbt {dbt_subcommand} --profiles-dir /usr/app/dbt --project-dir /usr/app/dbt"
+
+    print(f"Dang chay lenh: {cmd}")
+    exit_code, output = container.exec_run(cmd, stream=False, demux=False)
+    log_text = output.decode("utf-8", errors="replace") if isinstance(output, bytes) else str(output)
+    print(log_text)
+
+    if exit_code != 0:
+        raise RuntimeError(
+            f"Lenh 'dbt {dbt_subcommand}' that bai (exit code {exit_code}).\n"
+            f"Xem log ben tren de biet chi tiet loi."
+        )
+    print(f"Hoan tat: dbt {dbt_subcommand}")
+
+
+def task_dbt_run():
+    run_dbt_command("run")
+
+
+def task_dbt_test():
+    run_dbt_command("test")
+
+
+# ----------------------------------------------------------------------
 # Dinh nghia DAG
 # ----------------------------------------------------------------------
 with DAG(
     dag_id="hospital_dw_batch_pipeline",
-    description="Do an 5 - Pipeline batch: xu ly PySpark (tang 3) -> nap Postgres (tang 5)",
+    description="Do an 5 - Pipeline batch: xu ly PySpark (tang 3) -> nap Postgres (tang 5) -> dbt (tang 7)",
     start_date=datetime(2026, 1, 1),
     schedule=None,       # chi chay khi bam nut Trigger thu cong (demo/do an)
     catchup=False,
@@ -77,4 +108,14 @@ with DAG(
         python_callable=task_load_layer5,
     )
 
-    process_layer3 >> load_layer5
+    dbt_run_layer7 = PythonOperator(
+        task_id="dbt_run_layer7",
+        python_callable=task_dbt_run,
+    )
+
+    dbt_test_layer7 = PythonOperator(
+        task_id="dbt_test_layer7",
+        python_callable=task_dbt_test,
+    )
+
+    process_layer3 >> load_layer5 >> dbt_run_layer7 >> dbt_test_layer7

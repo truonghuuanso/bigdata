@@ -1,1 +1,0 @@
-select * from "hospital_dw"."public"."fact_admission"
