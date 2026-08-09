@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: stg_dim_patient
+    description: "Dimension benh nhan"
+    columns:
+      - name: patient_key
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_dim_department
+    description: "Dimension khoa/phong"
+    columns:
+      - name: department_key
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_dim_diagnosis
+    description: "Dimension chan doan"
+    columns:
+      - name: diagnosis_key
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_dim_date
+    description: "Dimension ngay thang"
+    columns:
+      - name: date_key
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_fact_admission
+    description: "Fact table - moi dong la 1 lan nhap vien"
+    columns:
+      - name: encounter_id
+        tests:
+          - unique
+          - not_null
+      - name: patient_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_dim_patient')
+              field: patient_key
+      - name: department_key
+        tests:
+          - relationships:
+              to: ref('stg_dim_department')
+              field: department_key
+      - name: diagnosis_key
+        tests:
+          - relationships:
+              to: ref('stg_dim_diagnosis')
+              field: diagnosis_key
+      - name: readmitted_30d
+        tests:
+          - accepted_values:
+              values: [0, 1]

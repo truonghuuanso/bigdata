@@ -1,0 +1,111 @@
+[2026-08-09T08:36:14.960+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2026-08-09T08:36:14.991+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: hospital_dw_batch_pipeline.process_pyspark_layer3 manual__2026-08-09T08:36:13.936393+00:00 [queued]>
+[2026-08-09T08:36:14.999+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: hospital_dw_batch_pipeline.process_pyspark_layer3 manual__2026-08-09T08:36:13.936393+00:00 [queued]>
+[2026-08-09T08:36:15.003+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 1
+[2026-08-09T08:36:15.014+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): process_pyspark_layer3> on 2026-08-09 08:36:13.936393+00:00
+[2026-08-09T08:36:15.020+0000] {standard_task_runner.py:90} INFO - Running: ['airflow', 'tasks', 'run', 'hospital_dw_batch_pipeline', 'process_pyspark_layer3', 'manual__2026-08-09T08:36:13.936393+00:00', '--job-id', '9', '--raw', '--subdir', 'DAGS_FOLDER/hospital_dw_pipeline.py', '--cfg-path', '/tmp/tmpt73mh7lu']
+[2026-08-09T08:36:15.022+0000] {logging_mixin.py:188} WARNING - /home/airflow/.local/lib/python3.12/site-packages/airflow/task/task_runner/standard_task_runner.py:62 DeprecationWarning: This process (pid=716) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-08-09T08:36:15.023+0000] {standard_task_runner.py:91} INFO - Job 9: Subtask process_pyspark_layer3
+[2026-08-09T08:36:15.023+0000] {standard_task_runner.py:64} INFO - Started process 717 to run task
+[2026-08-09T08:36:15.094+0000] {task_command.py:426} INFO - Running <TaskInstance: hospital_dw_batch_pipeline.process_pyspark_layer3 manual__2026-08-09T08:36:13.936393+00:00 [running]> on host 72934859ffda
+[2026-08-09T08:36:15.167+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='airflow' AIRFLOW_CTX_DAG_ID='hospital_dw_batch_pipeline' AIRFLOW_CTX_TASK_ID='process_pyspark_layer3' AIRFLOW_CTX_EXECUTION_DATE='2026-08-09T08:36:13.936393+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-08-09T08:36:13.936393+00:00'
+[2026-08-09T08:36:15.168+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2026-08-09T08:36:15.211+0000] {logging_mixin.py:188} INFO - Dang chay lenh: /opt/spark/bin/spark-submit --master spark://spark-master:7077 --conf spark.jars.ivy=/tmp/.ivy2 --packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 /opt/spark-jobs/process_hospital_dw.py
+[2026-08-09T08:36:52.975+0000] {logging_mixin.py:188} INFO - :: loading settings :: url = jar:file:/opt/spark/jars/ivy-2.5.1.jar!/org/apache/ivy/core/settings/ivysettings.xml
+Ivy Default Cache set to: /tmp/.ivy2/cache
+The jars for the packages stored in: /tmp/.ivy2/jars
+org.apache.hadoop#hadoop-aws added as a dependency
+com.amazonaws#aws-java-sdk-bundle added as a dependency
+:: resolving dependencies :: org.apache.spark#spark-submit-parent-e9975691-7ce0-4d1a-8b3d-5e4c7c470d38;1.0
+	confs: [default]
+	found org.apache.hadoop#hadoop-aws;3.3.4 in central
+	found com.amazonaws#aws-java-sdk-bundle;1.12.262 in central
+	found org.wildfly.openssl#wildfly-openssl;1.0.7.Final in central
+:: resolution report :: resolve 172ms :: artifacts dl 6ms
+	:: modules in use:
+	com.amazonaws#aws-java-sdk-bundle;1.12.262 from central in [default]
+	org.apache.hadoop#hadoop-aws;3.3.4 from central in [default]
+	org.wildfly.openssl#wildfly-openssl;1.0.7.Final from central in [default]
+	---------------------------------------------------------------------
+	|                  |            modules            ||   artifacts   |
+	|       conf       | number| search|dwnlded|evicted|| number|dwnlded|
+	---------------------------------------------------------------------
+	|      default     |   3   |   0   |   0   |   0   ||   3   |   0   |
+	---------------------------------------------------------------------
+:: retrieving :: org.apache.spark#spark-submit-parent-e9975691-7ce0-4d1a-8b3d-5e4c7c470d38
+	confs: [default]
+	0 artifacts copied, 3 already retrieved (0kB/3ms)
+26/08/09 08:36:16 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+26/08/09 08:36:17 INFO SparkContext: Running Spark version 3.5.1
+26/08/09 08:36:17 INFO SparkContext: OS info Linux, 6.18.33.2-microsoft-standard-WSL2, amd64
+26/08/09 08:36:17 INFO SparkContext: Java version 11.0.22
+26/08/09 08:36:17 INFO ResourceUtils: ==============================================================
+26/08/09 08:36:17 INFO ResourceUtils: No custom resources configured for spark.driver.
+26/08/09 08:36:17 INFO ResourceUtils: ==============================================================
+26/08/09 08:36:17 INFO SparkContext: Submitted application: HospitalDW-Layer3-Processing
+26/08/09 08:36:17 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(memory -> name: memory, amount: 1024, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+26/08/09 08:36:17 INFO ResourceProfile: Limiting resource is cpu
+26/08/09 08:36:17 INFO ResourceProfileManager: Added ResourceProfile id: 0
+26/08/09 08:36:17 INFO SecurityManager: Changing view acls to: spark
+26/08/09 08:36:17 INFO SecurityManager: Changing modify acls to: spark
+26/08/09 08:36:17 INFO SecurityManager: Changing view acls groups to: 
+26/08/09 08:36:17 INFO SecurityManager: Changing modify acls groups to: 
+26/08/09 08:36:17 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: spark; groups with view permissions: EMPTY; users with modify permissions: spark; groups with modify permissions: EMPTY
+26/08/09 08:36:17 INFO Utils: Successfully started service 'sparkDriver' on port 42569.
+26/08/09 08:36:17 INFO SparkEnv: Registering MapOutputTracker
+26/08/09 08:36:17 INFO SparkEnv: Registering BlockManagerMaster
+26/08/09 08:36:17 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+26/08/09 08:36:17 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+26/08/09 08:36:17 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+26/08/09 08:36:17 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-dc11c511-0194-4fb5-8d0b-4e3834448d63
+26/08/09 08:36:17 INFO MemoryStore: MemoryStore started with capacity 434.4 MiB
+26/08/09 08:36:17 INFO SparkEnv: Registering OutputCommitCoordinator
+26/08/09 08:36:17 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
+26/08/09 08:36:18 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+26/08/09 08:36:18 INFO SparkContext: Added JAR file:///tmp/.ivy2/jars/org.apache.hadoop_hadoop-aws-3.3.4.jar at spark://16bfa56c2714:42569/jars/org.apache.hadoop_hadoop-aws-3.3.4.jar with timestamp 1786264577418
+26/08/09 08:36:18 INFO SparkContext: Added JAR file:///tmp/.ivy2/jars/com.amazonaws_aws-java-sdk-bundle-1.12.262.jar at spark://16bfa56c2714:42569/jars/com.amazonaws_aws-java-sdk-bundle-1.12.262.jar with timestamp 1786264577418
+26/08/09 08:36:18 INFO SparkContext: Added JAR file:///tmp/.ivy2/jars/org.wildfly.openssl_wildfly-openssl-1.0.7.Final.jar at spark://16bfa56c2714:42569/jars/org.wildfly.openssl_wildfly-openssl-1.0.7.Final.jar with timestamp 1786264577418
+26/08/09 08:36:18 INFO SparkContext: Added file file:///tmp/.ivy2/jars/org.apache.hadoop_hadoop-aws-3.3.4.jar at spark://16bfa56c2714:42569/files/org.apache.hadoop_hadoop-aws-3.3.4.jar with timestamp 1786264577418
+26/08/09 08:36:18 INFO Utils: Copying /tmp/.ivy2/jars/org.apache.hadoop_hadoop-aws-3.3.4.jar to /tmp/spark-08da09f7-dbe5-46cf-9a0a-121281c5da12/userFiles-1cfa704f-4cc6-43bd-bc0c-7b7552cd7ee9/org.apache.hadoop_hadoop-aws-3.3.4.jar
+26/08/09 08:36:18 INFO SparkContext: Added file file:///tmp/.ivy2/jars/com.amazonaws_aws-java-sdk-bundle-1.12.262.jar at spark://16bfa56c2714:42569/files/com.amazonaws_aws-java-sdk-bundle-1.12.262.jar with timestamp 1786264577418
+26/08/09 08:36:18 INFO Utils: Copying /tmp/.ivy2/jars/com.amazonaws_aws-java-sdk-bundle-1.12.262.jar to /tmp/spark-08da09f7-dbe5-46cf-9a0a-121281c5da12/userFiles-1cfa704f-4cc6-43bd-bc0c-7b7552cd7ee9/com.amazonaws_aws-java-sdk-bundle-1.12.262.jar
+26/08/09 08:36:18 INFO SparkContext: Added file file:///tmp/.ivy2/jars/org.wildfly.openssl_wildfly-openssl-1.0.7.Final.jar at spark://16bfa56c2714:42569/files/org.wildfly.openssl_wildfly-openssl-1.0.7.Final.jar with timestamp 1786264577418
+26/08/09 08:36:18 INFO Utils: Copying /tmp/.ivy2/jars/org.wildfly.openssl_wildfly-openssl-1.0.7.Final.jar to /tmp/spark-08da09f7-dbe5-46cf-9a0a-121281c5da12/userFiles-1cfa704f-4cc6-43bd-bc0c-7b7552cd7ee9/org.wildfly.openssl_wildfly-openssl-1.0.7.Final.jar
+26/08/09 08:36:18 INFO StandaloneAppClient$ClientEndpoint: Connecting to master spark://spark-master:7077...
+26/08/09 08:36:18 INFO TransportClientFactory: Successfully created connection to spark-master/172.18.0.5:7077 after 18 ms (0 ms spent in bootstraps)
+26/08/09 08:36:18 INFO StandaloneSchedulerBackend: Connected to Spark cluster with app ID app-20260809083618-0002
+26/08/09 08:36:18 INFO StandaloneAppClient$ClientEndpoint: Executor added: app-20260809083618-0002/0 on worker-20260809075400-172.18.0.10-38235 (172.18.0.10:38235) with 2 core(s)
+26/08/09 08:36:18 INFO StandaloneSchedulerBackend: Granted executor ID app-20260809083618-0002/0 on hostPort 172.18.0.10:38235 with 2 core(s), 1024.0 MiB RAM
+26/08/09 08:36:18 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 35335.
+26/08/09 08:36:18 INFO NettyBlockTransferService: Server created on 16bfa56c2714:35335
+26/08/09 08:36:18 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+26/08/09 08:36:18 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, 16bfa56c2714, 35335, None)
+26/08/09 08:36:18 INFO BlockManagerMasterEndpoint: Registering block manager 16bfa56c2714:35335 with 434.4 MiB RAM, BlockManagerId(driver, 16bfa56c2714, 35335, None)
+26/08/09 08:36:18 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, 16bfa56c2714, 35335, None)
+26/08/09 08:36:18 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, 16bfa56c2714, 35335, None)
+26/08/09 08:36:18 INFO StandaloneAppClient$ClientEndpoint: Executor updated: app-20260809083618-0002/0 is now RUNNING
+26/08/09 08:36:19 INFO StandaloneSchedulerBackend: SchedulerBackend is ready for scheduling beginning after reached minRegisteredResourcesRatio: 0.0
+26/08/09 08:36:20 WARN MetricsConfig: Cannot locate configuration: tried hadoop-metrics2-s3a-file-system.properties,hadoop-metrics2.properties
+Da doc 101766 dong tu diabetic_data.csv
+26/08/09 08:36:30 WARN WindowExec: No Partition Defined for Window operation! Moving all data to a single partition, this can cause serious performance degradation.
+26/08/09 08:36:30 WARN WindowExec: No Partition Defined for Window operation! Moving all data to a single partition, this can cause serious performance degradation.
+26/08/09 08:36:30 WARN WindowExec: No Partition Defined for Window operation! Moving all data to a single partition, this can cause serious performance degradation.
+26/08/09 08:36:30 WARN WindowExec: No Partition Defined for Window operation! Moving all data to a single partition, this can cause serious performance degradation.
+26/08/09 08:36:31 WARN WindowExec: No Partition Defined for Window operation! Moving all data to a single partition, this can cause serious performance degradation.
+26/08/09 08:36:31 WARN WindowExec: No Partition Defined for Window operation! Moving all data to a single partition, this can cause serious performance degradation.
+26/08/09 08:36:32 WARN WindowExec: No Partition Defined for Window operation! Moving all data to a single partition, this can cause serious performance degradation.
+26/08/09 08:36:32 WARN WindowExec: No Partition Defined for Window operation! Moving all data to a single partition, this can cause serious performance degradation.
+KIEM TRA: du lieu sau lam sach co 100114 dong, fact_admission co 100114 dong
+HOAN TAT tang 3. Da ghi 1 fact + 4 dimension vao hospital-curated/
+  fact_admission: 100114 dong
+  dim_patient   : 70439 dong
+  dim_department: 73 dong
+  dim_diagnosis : 2088 dong
+  dim_date      : 3664 dong
+[2026-08-09T08:36:52.976+0000] {logging_mixin.py:188} INFO - Hoan tat: /opt/spark-jobs/process_hospital_dw.py
+[2026-08-09T08:36:52.977+0000] {python.py:237} INFO - Done. Returned value was: None
+[2026-08-09T08:36:52.978+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2026-08-09T08:36:52.987+0000] {taskinstance.py:1206} INFO - Marking task as SUCCESS. dag_id=hospital_dw_batch_pipeline, task_id=process_pyspark_layer3, run_id=manual__2026-08-09T08:36:13.936393+00:00, execution_date=20260809T083613, start_date=20260809T083614, end_date=20260809T083652
+[2026-08-09T08:36:53.032+0000] {local_task_job_runner.py:243} INFO - Task exited with return code 0
+[2026-08-09T08:36:53.062+0000] {taskinstance.py:3503} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-08-09T08:36:53.065+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

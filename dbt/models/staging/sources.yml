@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: raw_dw
+    schema: public
+    description: "5 bang star schema da nap tu Spark (tang 3+5) - lop silver"
+    tables:
+      - name: fact_admission
+      - name: dim_patient
+      - name: dim_department
+      - name: dim_diagnosis
+      - name: dim_date

@@ -1,0 +1,1 @@
+select * from "hospital_dw"."public"."dim_patient"

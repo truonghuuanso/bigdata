@@ -1,0 +1,19 @@
+name: 'hospital_dw'
+version: '1.0.0'
+config-version: 2
+profile: 'hospital_dw'
+
+model-paths: ["models"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  hospital_dw:
+    staging:
+      +materialized: view      # bang staging chi la view - nhe, luon phan anh du lieu moi nhat
+    marts:
+      +materialized: table     # bang mart la table that - de Metabase doc nhanh

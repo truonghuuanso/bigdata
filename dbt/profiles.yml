@@ -1,0 +1,12 @@
+hospital_dw:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: postgres
+      user: dwuser
+      password: dwpassword
+      port: 5432
+      dbname: hospital_dw
+      schema: public
+      threads: 4
