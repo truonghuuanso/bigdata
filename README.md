@@ -5,8 +5,8 @@ Kiến trúc Big Data / Data Warehouse chạy 100% local bằng Docker Compose
 (phương án open-source thay AWS): MinIO → Kafka → Spark → Postgres → dbt → Airflow → Metabase.
 
 **Phạm vi README này: Tầng 1 → Tầng 7 (đã hoàn thành và kiểm chứng).**
-Tầng 8 (AI/ML dự đoán tái nhập + RAG tra cứu phác đồ) **không nằm trong phạm vi này**,
-để nhóm làm riêng trên máy mạnh hơn (cần Ollama + LLM local, khá nặng RAM).
+Tầng 8 ( RAG tra cứu phác đồ) **không nằm trong phạm vi này**, nhưng phần AI/ML dự đoán tái nhập đã làm có thể xem
+
 
 ---
 
