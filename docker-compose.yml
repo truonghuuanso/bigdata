@@ -111,6 +111,15 @@ services:
                airflow users create --username admin --password admin --firstname A --lastname D --role Admin --email admin@example.com &&
                airflow standalone"
 
+  # ---------------- Ollama (LLM local - cho RAG tra cuu phac do) ----------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
   # ---------------- dbt (transformation - silver -> gold) ----------------
   dbt:
     image: ghcr.io/dbt-labs/dbt-postgres:1.7.13
@@ -144,3 +153,4 @@ volumes:
   kafka_data:
   postgres_data:
   spark_ivy_cache:
+  ollama_data:

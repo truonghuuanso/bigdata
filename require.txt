@@ -2,3 +2,7 @@ pyspark==3.5.1
 pandas
 python-kafka
 docker
+boto3 sqlalchemy psycopg2-binary
+ollama chromadb
+pandas scikit-learn sqlalchemy psycopg2-binary joblib 
+ llama-index llama-index-llms-ollama llama-index-embeddings-ollama llama-index-vector-stores-chroma chromadb
