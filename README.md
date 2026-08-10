@@ -4,10 +4,11 @@
 Kiến trúc Big Data / Data Warehouse chạy 100% local bằng Docker Compose
 (phương án open-source thay AWS): MinIO → Kafka → Spark → Postgres → dbt → Airflow → Metabase.
 
-**Phạm vi README này: Tầng 1 → Tầng 7 (đã hoàn thành và kiểm chứng).**
-Tầng 8 ( RAG tra cứu phác đồ) **không nằm trong phạm vi này**, nhưng phần AI/ML dự đoán tái nhập đã làm có thể xem
+**Phạm vi README này: Tầng 1 → Tầng 7, và phần AI/ML dự đoán tái nhập của Tầng 8.**
+Riêng phần RAG tra cứu phác đồ (Ollama + LlamaIndex) **không nằm trong phạm vi này**,
+để nhóm làm riêng trên máy mạnh hơn (cần LLM local, khá nặng RAM, đã thử và model nhỏ
+cho kết quả không đáng tin cậy — xem ghi chú ở mục 6).
 
-RAG tra cứu phác đồ cũng đã xong nhưng chưa hoàn thiện, model từ phát đồ chưa nói chính xác tự bịa nhiều
 ---
 
 ## 1. Kiến trúc tổng thể
@@ -39,12 +40,20 @@ CSV (Kaggle)
 [Tầng 7] dbt: staging views + 2 mart +          ← GOLD (sẵn sàng cho BI)
           test toàn vẹn + snapshot lịch sử
    │
-   ▼
-[Tầng 8 - KHÔNG THUỘC PHẠM VI README NÀY]
-Metabase dashboard (đã setup, 3 chart) + AI/ML (nhóm khác làm)
+   ├──────────────────────────────┐
+   ▼                               ▼
+Metabase dashboard              [Tầng 8 - AI/ML]
+(3 chart: tỷ lệ tái nhập        Random Forest (scikit-learn) dự đoán
+theo khoa/chẩn đoán, LOS)       xác suất tái nhập 30 ngày → ghi bảng
+                                 predictions_readmission_risk → thêm
+                                 1 chart Metabase "Danh sách bệnh nhân
+                                 rủi ro cao"
 
-[Tầng 6] Airflow điều phối toàn bộ chuỗi:
+[RAG tra cứu phác đồ - KHÔNG THUỘC PHẠM VI README NÀY, nhóm khác làm]
+
+[Tầng 6] Airflow điều phối toàn bộ chuỗi tầng 1-7:
 Spark job (tầng 3) → load Postgres (tầng 5) → dbt run → dbt test
+(riêng tầng 8 AI/ML chạy tay, không nằm trong DAG)
 ```
 
 ---
@@ -84,6 +93,7 @@ doan5-hospital-dw/
 ├── postgres-init/
 │   └── 01-create-airflow-db.sql    # tu tao database airflow_meta
 ├── kafka_producer.py                # Tang 2: gia lap thiet bi IoT
+├── train_readmission_model.py       # Tang 8 (AI/ML): du doan tai nhap 30 ngay
 ├── check.py                         # script kiem tra suc khoe toan he thong
 └── README.md
 ```
@@ -160,8 +170,20 @@ python kafka_producer.py
 
 ### Bước 8 — Kết nối Metabase (đã làm sẵn, không cần lặp lại)
 http://localhost:3000 → PostgreSQL: host `postgres`, port `5432`, database `hospital_dw`,
-user `dwuser`, password `dwpassword`. Dashboard `Hospital Operations Dashboard` đã có 3 chart:
-tỷ lệ tái nhập theo khoa, theo chẩn đoán, LOS trung bình theo khoa.
+user `dwuser`, password `dwpassword`. Dashboard `Hospital Operations Dashboard` đã có 4 chart:
+tỷ lệ tái nhập theo khoa, theo chẩn đoán, LOS trung bình theo khoa, và danh sách bệnh
+nhân rủi ro cao (từ Bước 9 bên dưới).
+
+### Bước 9 — AI/ML: train model dự đoán tái nhập (Tầng 8, chạy tay, không nằm trong DAG)
+```bash
+pip install pandas scikit-learn sqlalchemy psycopg2-binary joblib
+python train_readmission_model.py
+```
+Script đọc dữ liệu từ Postgres, train, đánh giá, lưu model, và **tự ghi kết quả dự đoán
+ngược lại Postgres** vào bảng `predictions_readmission_risk`. Sau khi chạy xong, vào lại
+Metabase, tạo thêm 1 chart mới (Table hoặc Bar) từ bảng này, sort giảm dần theo
+`predicted_readmit_probability`, thêm vào dashboard — đây chính là chart
+"Danh sách cảnh báo bệnh nhân rủi ro cao" đã có trong dashboard.
 
 ---
 
@@ -215,9 +237,61 @@ xử lý riêng). Task sau chỉ chạy khi task trước `success`.
 - **Snapshot** (`dbt/snapshots/snapshot_dim_patient.sql`): tự động lưu lịch sử thay đổi
   của `dim_patient` (chiến lược `check`, theo dõi cột race/gender/age).
 
+### Tầng 8 — AI/ML: dự đoán tái nhập viện 30 ngày (thay cho Amazon SageMaker)
+`train_readmission_model.py`: đọc dữ liệu từ Postgres (join `fact_admission` với 3
+dimension), train **Random Forest** (scikit-learn), ghi kết quả dự đoán ngược lại
+Postgres vào bảng `predictions_readmission_risk`.
+
+**2 vấn đề kỹ thuật đã xử lý (quan trọng, đọc trước khi sửa lại model):**
+
+1. **Dữ liệu mất cân bằng** (chỉ ~11.3% ca thật sự tái nhập trong 30 ngày) — nếu train
+   bình thường, model sẽ "lười" đoán toàn số 0 để đạt accuracy cao giả tạo (~89%) mà
+   không phát hiện được ca nào thật. Xử lý bằng `class_weight="balanced"` trong
+   `RandomForestClassifier`.
+
+2. **Tác dụng phụ của `class_weight`**: làm xác suất đầu ra (`predict_proba`) bị lệch
+   cao bất thường (từng đo được trung bình 47.66% thay vì đúng ~11.3% thực tế) — không
+   còn đáng tin cậy làm con số phần trăm thật, dù xếp hạng tương đối vẫn đúng. Xử lý
+   bằng **`CalibratedClassifierCV`** để hiệu chỉnh lại xác suất về đúng phân bố thực tế
+   (train 2 model song song: `model_raw` để lấy feature importance giải thích, và
+   `model_calibrated` để lấy xác suất dùng cho đánh giá + ghi Postgres).
+
+3. **Hệ quả tiếp theo của việc hiệu chỉnh**: sau khi xác suất đã đúng ~11%, ngưỡng phân
+   loại mặc định 0.5 khiến `.predict()` không bao giờ dự đoán lớp thiểu số nữa (recall
+   tụt về 0). Xử lý bằng cách **tự tìm ngưỡng tối ưu hoá F1-score** qua
+   `precision_recall_curve` thay vì dùng 0.5 cố định (ngưỡng tìm được ≈ 0.136).
+
+**Kết quả cuối cùng (đáng tin cậy, dùng để báo cáo):**
+- ROC-AUC = 0.639 (hợp lý với dataset này — nhiều nghiên cứu học thuật công khai trên
+  cùng bộ Diabetes 130-US hospitals cũng chỉ đạt mức tương đương, do dữ liệu thiếu
+  thông tin lâm sàng chi tiết).
+- Recall lớp "Tái nhập 30 ngày" = 0.41 (bắt được 41% ca thật sự tái nhập).
+- Xác suất trung bình dự đoán = 11.35%, khớp gần như tuyệt đối với tỷ lệ thật 11.34%
+  (chứng minh calibration hoạt động đúng).
+- Top đặc trưng quan trọng nhất: `prior_visits_total` (số lần khám trước đó) và
+  `readmit_risk_flag` (đặc trưng tự tạo ở tầng 3) — khớp với logic y khoa thường gặp.
+
+**Lưu ý khi giải trình:** đây là model sàng lọc sơ bộ (precision chỉ ~17-19%, tức 4/5
+cảnh báo là "báo động giả"), không phải công cụ chẩn đoán chính xác — phù hợp cho mục
+đích ưu tiên nguồn lực theo dõi, không thay thế đánh giá lâm sàng.
+
 ---
 
-## 6. Các lỗi/quyết định kỹ thuật quan trọng đã xử lý
+## 6. Phần đã thử nhưng KHÔNG đưa vào phạm vi đồ án này
+
+Đã thử xây RAG tra cứu phác đồ (Ollama + ChromaDB/LlamaIndex) nhưng dừng lại vì 2 lý do:
+1. Model nhỏ nhất chạy được trên máy (`llama3.2:1b`) cho câu trả lời **không bám sát
+   tài liệu**, thậm chí bịa nội dung sai (ví dụ nhầm lẫn hạ đường huyết với chỉ số
+   HbA1c) — cần model lớn hơn (`llama3.2:3b`+) để đáng tin cậy.
+2. Chạy Ollama đồng thời với Spark + Airflow gây **hết RAM**, container Ollama bị
+   Docker tự kill giữa chừng khi trả lời.
+
+Nếu nhóm làm tiếp phần này trên máy mạnh hơn, code mẫu (chưa hoàn thiện, cần đổi model
+lớn hơn và tinh chỉnh lại) vẫn còn trong lịch sử trao đổi — liên hệ để lấy lại nếu cần.
+
+---
+
+## 7. Các lỗi/quyết định kỹ thuật quan trọng đã xử lý
 
 Ghi lại để hiểu *tại sao* code viết như hiện tại, tránh sửa nhầm về lại lỗi cũ.
 
@@ -250,9 +324,13 @@ Ghi lại để hiểu *tại sao* code viết như hiện tại, tránh sửa n
    `EXTERNAL` cho Windows-to-container như `kafka_producer.py`) — 1 listener duy nhất
    quảng bá `localhost` sẽ làm container khác không kết nối được.
 
+7. **Model dự đoán tái nhập** — xem chi tiết đầy đủ ở mục 5, Tầng 8 (3 vấn đề: mất
+   cân bằng dữ liệu, xác suất bị lệch do class_weight, ngưỡng 0.5 mặc định sai sau khi
+   hiệu chỉnh).
+
 ---
 
-## 7. Các URL và tài khoản quan trọng
+## 8. Các URL và tài khoản quan trọng
 
 | Dịch vụ | URL | Tài khoản |
 |---|---|---|
@@ -263,18 +341,17 @@ Ghi lại để hiểu *tại sao* code viết như hiện tại, tránh sửa n
 | Adminer (xem Postgres) | http://localhost:8083 | dwuser / dwpassword (DB: hospital_dw) |
 | Metabase | http://localhost:3000 | tự tạo lúc setup |
 
-## 8. Kiểm tra sức khoẻ hệ thống
+## 9. Kiểm tra sức khoẻ hệ thống
 
 Sau khi setup hoặc mỗi lần chỉnh sửa code, chạy script kiểm tra tổng thể:
 ```bash
 pip install docker boto3 sqlalchemy psycopg2-binary
 python check.py
 ```
-Script kiểm tra: container Docker đang chạy, bucket/file MinIO, 9 bảng Postgres
-(5 gốc + staging + 2 mart + snapshot) đủ số dòng mong đợi, và logic dữ liệu
-(không có `patient_key` NULL, tỷ lệ `readmitted_30d` hợp lý 5-20%).
-
-
+Script kiểm tra: container Docker đang chạy, bucket/file MinIO, 10 bảng Postgres
+(5 gốc + staging + 2 mart + snapshot + bảng dự đoán `predictions_readmission_risk`)
+đủ số dòng mong đợi, và logic dữ liệu (không có `patient_key` NULL, tỷ lệ
+`readmitted_30d` hợp lý 5-20%).
 
 
 
