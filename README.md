@@ -7,7 +7,7 @@ Kiến trúc Big Data / Data Warehouse chạy 100% local bằng Docker Compose
 **Phạm vi README này: Tầng 1 → Tầng 7 (đã hoàn thành và kiểm chứng).**
 Tầng 8 ( RAG tra cứu phác đồ) **không nằm trong phạm vi này**, nhưng phần AI/ML dự đoán tái nhập đã làm có thể xem
 
-
+RAG tra cứu phác đồ cũng đã xong nhưng chưa hoàn thiện, model từ phát đồ chưa nói chính xác tự bịa nhiều
 ---
 
 ## 1. Kiến trúc tổng thể
