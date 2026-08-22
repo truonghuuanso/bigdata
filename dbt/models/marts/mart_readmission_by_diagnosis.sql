@@ -1,5 +1,3 @@
--- Mart: ty le tai nhap vien 30 ngay, LOS trung binh, theo tung nhom benh (ICD-9)
-
 select
     di.diag_1_group,
     count(*) as so_luot_kham,

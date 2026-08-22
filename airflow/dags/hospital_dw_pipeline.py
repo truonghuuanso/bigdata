@@ -1,21 +1,10 @@
-"""
-Tang 6 - Airflow DAG dong goi pipeline batch:
-  Tang 3 (xu ly PySpark, tao star schema Parquet) -> Tang 5 (nap vao Postgres)
-
-Chay bang cach dieu khien container spark-master co san qua Docker socket
-(dung thu vien docker-py), giong het lenh spark-submit ban da go tay truoc do.
-"""
-
 from datetime import datetime
 
 import docker
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-# ----------------------------------------------------------------------
-# Ham dung chung: goi docker exec vao container spark-master de chay
-# 1 file spark-submit, tuong tu lenh ban da go tay tren terminal
-# ----------------------------------------------------------------------
+
 def run_spark_submit(script_path: str, extra_packages: str = ""):
     client = docker.from_env()
     container = client.containers.get("spark-master")
@@ -54,11 +43,6 @@ def task_load_layer5():
         extra_packages="org.postgresql:postgresql:42.7.3",
     )
 
-
-# ----------------------------------------------------------------------
-# Ham dung chung: goi docker exec vao container dbt de chay lenh dbt,
-# giong het lenh ban da go tay tren terminal
-# ----------------------------------------------------------------------
 def run_dbt_command(dbt_subcommand: str):
     client = docker.from_env()
     container = client.containers.get("dbt")
@@ -85,15 +69,11 @@ def task_dbt_run():
 def task_dbt_test():
     run_dbt_command("test")
 
-
-# ----------------------------------------------------------------------
-# Dinh nghia DAG
-# ----------------------------------------------------------------------
 with DAG(
     dag_id="hospital_dw_batch_pipeline",
     description="Do an 5 - Pipeline batch: xu ly PySpark (tang 3) -> nap Postgres (tang 5) -> dbt (tang 7)",
     start_date=datetime(2026, 1, 1),
-    schedule=None,       # chi chay khi bam nut Trigger thu cong (demo/do an)
+    schedule=None,      
     catchup=False,
     tags=["doan5", "hospital-dw"],
 ) as dag:

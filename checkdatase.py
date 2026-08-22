@@ -1,12 +1,5 @@
-"""
-Script khám phá dataset Diabetes 130-US hospitals (Đồ án 5)
-Chạy: python explore_dataset.py
-Yêu cầu: pip install pandas
-"""
-
 import pandas as pd
 
-# ---- Chỉnh lại đường dẫn cho đúng máy bạn ----
 DATA_PATH = "data/raw/diabetic_data.csv"
 MAPPING_PATH = "data/raw/IDS_mapping.csv"
 

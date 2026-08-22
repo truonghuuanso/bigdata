@@ -1,5 +1,4 @@
 services:
-  # ---------------- MinIO (thay cho S3) ----------------
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -13,7 +12,6 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
 
-  # ---------------- Kafka (2 luong ket noi: internal + external) ----------------
   kafka:
     image: apache/kafka:3.7.0
     container_name: kafka
@@ -32,7 +30,6 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
 
-  # ---------------- Kafka UI (giao dien web) ----------------
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
@@ -44,14 +41,13 @@ services:
       - KAFKA_CLUSTERS_0_NAME=local-kafka
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
 
-  # ---------------- Spark (image chinh thuc Apache: master + 1 worker) ----------------
   spark-master:
     image: apache/spark:3.5.1
     container_name: spark-master
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
     ports:
-      - "8080:8080"   # Spark Master UI
-      - "7077:7077"   # Spark master port
+      - "8080:8080"   
+      - "7077:7077"   
     volumes:
       - ./spark-jobs:/opt/spark-jobs
       - spark_ivy_cache:/opt/bitnami/spark/.ivy2
@@ -71,7 +67,6 @@ services:
       - ./spark-jobs:/opt/spark-jobs
       - spark_ivy_cache:/opt/bitnami/spark/.ivy2
 
-  # ---------------- Postgres (dung chung: warehouse cho dbt + metadata Airflow) ----------------
   postgres:
     image: postgres:15
     container_name: postgres
@@ -85,7 +80,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
 
-  # ---------------- Airflow (LocalExecutor, standalone-style) ----------------
   airflow:
     image: apache/airflow:2.9.3
     container_name: airflow
@@ -97,11 +91,9 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       _AIRFLOW_WWW_USER_USERNAME: admin
       _AIRFLOW_WWW_USER_PASSWORD: admin
-      # Tu dong cai them thu vien docker-py luc container khoi dong,
-      # de DAG dieu khien duoc container spark-master qua Docker socket
       _PIP_ADDITIONAL_REQUIREMENTS: docker
     ports:
-      - "8081:8080"   # doi 8081 de tranh trung cong voi Spark UI (8080)
+      - "8081:8080"   
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
@@ -111,7 +103,6 @@ services:
                airflow users create --username admin --password admin --firstname A --lastname D --role Admin --email admin@example.com &&
                airflow standalone"
 
-  # ---------------- Ollama (LLM local - cho RAG tra cuu phac do) ----------------
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
@@ -120,7 +111,6 @@ services:
     volumes:
       - ollama_data:/root/.ollama
 
-  # ---------------- dbt (transformation - silver -> gold) ----------------
   dbt:
     image: ghcr.io/dbt-labs/dbt-postgres:1.7.13
     container_name: dbt
@@ -128,9 +118,8 @@ services:
       - postgres
     volumes:
       - ./dbt:/usr/app/dbt
-    entrypoint: ["tail", "-f", "/dev/null"]   # giu container song de "docker exec" chay lenh dbt
+    entrypoint: ["tail", "-f", "/dev/null"]   
 
-  # ---------------- Adminer (xem/quan ly Postgres qua web) ----------------
   adminer:
     image: adminer:latest
     container_name: adminer
@@ -139,7 +128,6 @@ services:
     ports:
       - "8083:8080"
 
-  # ---------------- Metabase (dashboard/BI) ----------------
   metabase:
     image: metabase/metabase:latest
     container_name: metabase

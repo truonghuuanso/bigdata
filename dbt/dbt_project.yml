@@ -14,6 +14,6 @@ clean-targets:
 models:
   hospital_dw:
     staging:
-      +materialized: view      # bang staging chi la view - nhe, luon phan anh du lieu moi nhat
+      +materialized: view      
     marts:
-      +materialized: table     # bang mart la table that - de Metabase doc nhanh
+      +materialized: table     

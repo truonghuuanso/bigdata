@@ -11,7 +11,7 @@ Chay: python check_pipeline_health.py
 import subprocess
 import sys
 
-RESULTS = []  # list of (ten_kiem_tra, True/False, ghi_chu)
+RESULTS = []  
 
 
 def log(name, ok, note=""):
@@ -25,10 +25,6 @@ def section(title):
     print(title)
     print("=" * 60)
 
-
-# ----------------------------------------------------------------------
-# 1. Kiem tra Docker containers dang chay
-# ----------------------------------------------------------------------
 section("1. DOCKER CONTAINERS")
 
 EXPECTED_CONTAINERS = [
@@ -57,10 +53,6 @@ except Exception as e:
     print("\nKhong ket noi duoc Docker. Kiem tra Docker Desktop co dang chay khong.")
     sys.exit(1)
 
-
-# ----------------------------------------------------------------------
-# 2. Kiem tra MinIO (bucket + file)
-# ----------------------------------------------------------------------
 section("2. MINIO (S3)")
 
 try:
@@ -97,10 +89,6 @@ except ImportError:
 except Exception as e:
     log("Ket noi MinIO", False, str(e))
 
-
-# ----------------------------------------------------------------------
-# 3. Kiem tra Postgres - 5 bang goc + dbt marts + snapshot
-# ----------------------------------------------------------------------
 section("3. POSTGRES - DATA WAREHOUSE")
 
 try:
@@ -109,7 +97,7 @@ try:
     engine = create_engine("postgresql+psycopg2://dwuser:dwpassword@localhost:5432/hospital_dw")
 
     EXPECTED_TABLES = {
-        "fact_admission": 90000,       # toi thieu mong doi (~100k, tru mot so ca loc bo)
+        "fact_admission": 90000,       
         "dim_patient": 60000,
         "dim_department": 50,
         "dim_diagnosis": 1000,
@@ -129,7 +117,6 @@ try:
             except Exception as e:
                 log(f"Bang '{table}'", False, "khong ton tai hoac loi truy van")
 
-        # Kiem tra logic: khong co dong nao patient_key bi NULL (bug da tung gap)
         try:
             null_count = conn.execute(
                 text("SELECT COUNT(*) FROM fact_admission WHERE patient_key IS NULL")
@@ -142,7 +129,6 @@ try:
         except Exception:
             log("Kiem tra NULL patient_key", False, "khong chay duoc (bang co ton tai khong?)")
 
-        # Kiem tra ty le tai nhap hop ly (~10-13%, dung voi phan bo dataset goc)
         try:
             pct = conn.execute(
                 text("SELECT AVG(readmitted_30d::float) * 100 FROM fact_admission")
@@ -152,7 +138,6 @@ try:
         except Exception:
             log("Kiem tra ty le readmitted_30d", False, "khong chay duoc")
 
-        # Model AI/ML da chay chua (bang optional)
         try:
             pred_count = conn.execute(
                 text("SELECT COUNT(*) FROM predictions_readmission_risk")
@@ -166,10 +151,6 @@ except ImportError:
 except Exception as e:
     log("Ket noi Postgres", False, str(e))
 
-
-# ----------------------------------------------------------------------
-# TONG KET
-# ----------------------------------------------------------------------
 section("TONG KET")
 
 total = len(RESULTS)

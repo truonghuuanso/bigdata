@@ -1,15 +1,3 @@
-"""
-Tang 8 (AI/ML) - Tro ly tra cuu phac do bang RAG, dung dung LlamaIndex
-nhu de bai yeu cau (thay the ban tu goi tay Ollama/ChromaDB truoc do).
-
-Cai thu vien can thiet (chay 1 lan):
-    pip install llama-index llama-index-llms-ollama llama-index-embeddings-ollama llama-index-vector-stores-chroma chromadb
-
-Truoc khi chay lan dau, can tai 2 model ve Ollama (chi 1 lan):
-    docker exec -it ollama ollama pull llama3.2:1b
-    docker exec -it ollama ollama pull nomic-embed-text
-"""
-
 import chromadb
 from llama_index.core import (
     SimpleDirectoryReader,
@@ -26,23 +14,14 @@ CHROMA_PATH = "./chroma_db_llamaindex"
 EMBED_MODEL = "nomic-embed-text"
 CHAT_MODEL = "llama3.2:1b"
 
-# ----------------------------------------------------------------------
-# 1. Cau hinh LlamaIndex dung Ollama local (thay the OpenAI mac dinh)
-# ----------------------------------------------------------------------
 Settings.llm = Ollama(model=CHAT_MODEL, base_url="http://localhost:11434", request_timeout=120.0)
 Settings.embed_model = OllamaEmbedding(model_name=EMBED_MODEL, base_url="http://localhost:11434")
 
-# ----------------------------------------------------------------------
-# 2. Ket noi ChromaDB (vector store) qua LlamaIndex
-# ----------------------------------------------------------------------
 chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
 chroma_collection = chroma_client.get_or_create_collection("phac_do")
 vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-# ----------------------------------------------------------------------
-# 3. Nap tai lieu (chi nap moi neu ChromaDB dang rong)
-# ----------------------------------------------------------------------
 if chroma_collection.count() > 0:
     print(f"Da co {chroma_collection.count()} doan trong ChromaDB, tai lai index co san.")
     index = VectorStoreIndex.from_vector_store(vector_store)
@@ -52,9 +31,6 @@ else:
     index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
     print(f"Da nap {len(documents)} tai lieu vao ChromaDB qua LlamaIndex.")
 
-# ----------------------------------------------------------------------
-# 4. Tao query engine - LlamaIndex tu lo het buoc retrieve + prompt + goi LLM
-# ----------------------------------------------------------------------
 SYSTEM_PROMPT = (
     "Ban la tro ly tra cuu thong tin y te noi bo, chi tra loi dua tren tai "
     "lieu duoc cung cap. Neu khong co du du lieu, hay noi ro. Luon nhac "
@@ -66,10 +42,6 @@ query_engine = index.as_query_engine(
     system_prompt=SYSTEM_PROMPT,
 )
 
-
-# ----------------------------------------------------------------------
-# 5. Giao dien dong lenh
-# ----------------------------------------------------------------------
 def main():
     print("=" * 60)
     print("TRO LY TRA CUU PHAC DO (RAG voi LlamaIndex) - Do an 5 Hospital DW")

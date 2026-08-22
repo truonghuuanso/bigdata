@@ -1,5 +1,3 @@
--- Mart: ty le tai nhap vien 30 ngay, LOS trung binh, theo tung khoa/phong
-
 select
     dd.medical_specialty,
     count(*) as so_luot_kham,
